@@ -1,0 +1,6 @@
+{
+    "BASE_URL": "https://sohoa.thuathienhue.gov.vn/data/",
+    "TOKEN_SOHOA": "b3fa104e-db3e-4df7-91af-3d22e7d5c3c2",
+    "KEY_MAP4D": "ac25ba6d68a7b8f179f26726f0de538c",
+    "MAP4D_URL": "https://api.map4d.vn/sdk/"
+}
