@@ -1,6 +1,6 @@
 import axios from "axios";
 
-let config = require("../config/config.json");
+let config = require("../Config/config.json");
 const headers = {
     token: config.TOKEN_SOHOA,
 }

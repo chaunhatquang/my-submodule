@@ -2,14 +2,20 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import ViewFile from '../Common/view_file';
+import Homepage from '../../screens/TrafficAccident/HomePage';
 
 const Stack = createStackNavigator();
 
 function StackNavigator(token: any) {
-    const navigation = useNavigation<any>();
-
+   
     return (
-        <Stack.Navigator initialRouteName='view_file'>
+        <Stack.Navigator initialRouteName='homepage'>
+            <Stack.Screen
+                name="homepage"
+                component={Homepage}
+                options={{ title: 'Giao thông' }}
+                initialParams={{ "token": token }}
+            />
             <Stack.Screen
                 name="view_file"
                 component={ViewFile}
