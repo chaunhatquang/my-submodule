@@ -1,13 +1,13 @@
 import Toast from "react-native-root-toast";
-import { IAddressComponents, IPhuongXa, IQuanHuyen } from "../../define";
-import { fetchPhuongXa } from "../services/api";
-import { fetchQuanHuyen } from "../services/api";
 import { checkIsNotNull } from "./checkNull";
+import { fetchPhuongXa, fetchQuanHuyen } from "../Services/api";
+import { IPhuongXa, IQuanHuyen } from "../../../define";
+
+const config = require('../Config/config.json');
+const URL = config.BASE_URL;
 
 export const getIDAddress = async (data: { admin_level_3: string, admin_level_4: string, street: string, housenumber: string, latitude: number, longitude: number }) => {
     let objRes: IResultAddComponent = {};
-    const config = require('../config/config.json');
-    const URL = config.BASE_URL;
 
     if (checkIsNotNull(data.street)) {
         objRes.street = data.street;

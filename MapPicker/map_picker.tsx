@@ -4,15 +4,16 @@ import MapView, { Marker } from "react-native-maps";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { getAddress } from "../../services/api";
 import { IAddressComponents, IResAddInfo } from "../../../define";
 import Toast from "react-native-root-toast";
-import { IPosition } from "../../utils/MyPosition";
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
-import { IResultAddComponent, getIDAddress } from "../../utils/GetIdAddress";
 import { useNavigation } from "@react-navigation/native";
+import { IPosition } from "../Utils/MyPosition";
+import { IResultAddComponent, getIDAddress } from "../Utils/GetIdAddress";
+import { getAddress } from "../Services/api";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-let config = require("../../config/config.json");
+let config = require('../Config/config.json');
 const MAP4D_URL = config.MAP4D_URL;
 const KEY_MAP4D = config.KEY_MAP4D;
 
@@ -48,14 +49,14 @@ const MapPicker = ({ route }: { route: any }) => {
                         return;
                     }
                 }
-            }
+            } 
             Geolocation.getCurrentPosition(
                 position => {
                     const { latitude, longitude } = position.coords;
                     setCurrentPosition({ latitude, longitude });
                     getNameAddress(latitude, longitude);
                 },
-                error => Toast.show(`Lỗi! ${error}`),
+                error => Toast.show(`Lỗi! ${error.message}`),
                 { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
             );
         };
@@ -114,12 +115,12 @@ const MapPicker = ({ route }: { route: any }) => {
 
     if (!currentPosition) {
         return (
-            <View>
+            <SafeAreaView style={{flex: 1}}>
                 <ActivityIndicator size={'large'} color={'blue'} />
                 <View style={{ width: '30%', alignSelf: 'center', marginVertical: 30 }}>
                     <Button title="Quay trở lại" onPress={() => navigation.goBack()}></Button>
                 </View>
-            </View>
+            </SafeAreaView>
         )
     }
 
@@ -158,37 +159,16 @@ const MapPicker = ({ route }: { route: any }) => {
         }
     }
 
-    // if (currentPosition !== null) {
-    //     const { myLaitude, myLongitude } = coords;
-    //     const params = {
-    //         "key": KEY_MAP4D,
-    //         "location": `${myLaitude},${myLongitude}`
-    //     }
-    //     moveCameraToPosition();
-    //     const fetchAddressInit = async () => {
-    //         const res = await getAddress(MAP4D_URL, params);
-    //         const { code, result } = res as any;
-    //         if (code === "ok") {
-    //             const nameAdd = result[0].address;
-    //             setNameAddress(nameAdd);
-    //         } else {
-    //             Toast.show("Lỗi !Không thể lấy về vị trí hiện tại!");
-    //             return;
-    //         }
-    //     }
-    //     fetchAddressInit();
-    // }
 
     const onMapReady = () => {
         setIsMapReady(true);
     }
 
     const handleConfirmPositions = () => {
-        navigation.navigate('plant_new', { addressInfos: addressInfos, userInfos: userInfos });
+        navigation.navigate('new_accident', { addressInfos: addressInfos, userInfos: userInfos });
     }
 
     const onRegionChange = (region: any) => {
-        console.log("region change");
         const lat = region?.latitude;
         const long = region?.longitude;
         setRegion(region);
@@ -268,62 +248,6 @@ const InfoComponent: React.FC<IAddInfoProps> = (props) => {
         </View>
     )
 }
-
-const CheckGPS = () => {
-    const [gpsEnabled, setGpsEnabled] = useState(false);
-
-    // useEffect(() => {
-    //     const checkPermission = async () => {
-    //         if (Platform.OS === 'android') {
-    //             const granted = await PermissionsAndroid.check(
-    //                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    //             );
-    //             if (!granted) {
-    //                 const status = await PermissionsAndroid.request(
-    //                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    //                 );
-    //                 if (status === 'denied') {
-    //                     return;
-    //                 }
-    //             }
-    //         }
-    //         Geolocation.getCurrentPosition(
-    //             (position) => {
-    //                 setGpsEnabled(true);
-    //             },
-    //             (error) => {
-    //                 setGpsEnabled(false);
-    //             },
-    //             { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-    //         );
-    //     };
-
-    //     checkPermission();
-    // }, []);
-
-    const requestEnableGPS = () => {
-        if (Platform.OS === 'android') {
-            Linking.openSettings();
-        } else {
-            Linking.openURL('App-Prefs:Privacy');
-        }
-    };
-
-    return (
-        <View>
-            {gpsEnabled ? (
-                <Text style={{ color: 'green' }}>GPS is enabled</Text>
-            ) : (
-                <View>
-                    <Text style={{ color: 'red' }}>GPS is disabled</Text>
-                    <Text onPress={requestEnableGPS} style={{ color: 'blue' }}>
-                        Request to enable GPS
-                    </Text>
-                </View>
-            )}
-        </View>
-    );
-};
 
 const styles = StyleSheet.create({
     mapMarkerContainer: {

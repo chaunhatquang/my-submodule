@@ -60,6 +60,29 @@ export function updateData<T>(
             });
     });
 }
+export function updateAnyData<T>(
+    url: string,
+    formData: FormData
+) {
+    const headers = {
+        token: config.TOKEN_SOHOA,
+        "Content-Type": "multipart/form-data"
+    }
+    return new Promise<T | null>(resolve => {
+        SoHoaClient
+            .post<T>(url + 'capnhatnhieu', formData, { headers: headers })
+            .then(response => {
+                var allData = response.data;
+                resolve(allData);
+            })
+            .catch(error => {
+                if (__DEV__) {
+                    console.log(error, 'err:', url);
+                }
+                resolve(null);
+            });
+    });
+}
 export function updateDataWithField<T>(
     url: string,
     formData: FormData
