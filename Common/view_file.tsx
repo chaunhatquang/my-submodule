@@ -5,7 +5,6 @@ import WebView from "react-native-webview";
 const ViewFile = ({ route }: { route: any }) => {
     const title = "Chi tiết file đính kèm";
     const { url } = route.params;
-    console.log("url", url);
     const urlSubString = url.substring(url.length - 4);
     if (urlSubString.includes('pdf') || urlSubString.includes('docx') || urlSubString.includes('xlsx') || urlSubString.includes('doc') || urlSubString.includes('xls') || urlSubString.includes('ppt') || urlSubString.includes('pptx') || urlSubString.includes('txt')) {
         const urlViewerFileOnAndroid = `https://docs.google.com/gview?embedded=true&url=${url}`;

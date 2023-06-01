@@ -11,8 +11,7 @@ export const ImageScreen = ({ route }: { route: any }) => {
   const images = urlImages.map((m: any) => {
     return { url: m.uri || m.anhdinhkem }
   });
-  console.log("images", images);
-
+  
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   return (
