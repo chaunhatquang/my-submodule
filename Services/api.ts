@@ -10,6 +10,7 @@ export const SoHoaClient = axios.create({
     baseURL: config.BASE_URL,
     headers: headers,
     timeout: 10000 //10s
+    
 })
 
 export const Map4DClient = axios.create({
@@ -19,7 +20,8 @@ export const Map4DClient = axios.create({
 
 export function fetchData<T>(
     url: string,
-    params: any
+    params: any,
+
 ) {
     return new Promise<T | null>(resolve => {
         SoHoaClient
