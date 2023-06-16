@@ -49,7 +49,7 @@ const MapPicker = ({ route }: { route: any }) => {
                         return;
                     }
                 }
-            } 
+            }
             Geolocation.getCurrentPosition(
                 position => {
                     const { latitude, longitude } = position.coords;
@@ -115,7 +115,7 @@ const MapPicker = ({ route }: { route: any }) => {
 
     if (!currentPosition) {
         return (
-            <SafeAreaView style={{flex: 1}}>
+            <SafeAreaView style={{ flex: 1 }}>
                 <ActivityIndicator size={'large'} color={'blue'} />
                 <View style={{ width: '30%', alignSelf: 'center', marginVertical: 30 }}>
                     <Button title="Quay trở lại" onPress={() => navigation.goBack()}></Button>
@@ -165,7 +165,11 @@ const MapPicker = ({ route }: { route: any }) => {
     }
 
     const handleConfirmPositions = () => {
-        navigation.navigate('new_accident', { addressInfos: addressInfos, userInfos: userInfos });
+        if (userInfos === null) {
+            Toast.show("Lỗi! Không thể kiểm tra được quyền");
+        } else {
+            navigation.navigate('new_accident', { addressInfos: addressInfos, userInfos: userInfos });
+        }
     }
 
     const onRegionChange = (region: any) => {

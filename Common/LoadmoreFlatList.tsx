@@ -1,23 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, ListRenderItem, Text, View } from 'react-native';
-import { ITrafficAccident } from '../../../define';
 
 interface CustomFlatListProps<T> {
+    // key?: string | number;
     renderItem: ListRenderItem<T>;
-    fetchData: (page: number) => Promise<T[]>;
+    fetchData: (page: number) => Promise<any>;
     keyword?: string;
+    reloadCounter: number;
 }
 
-const CustomFlatList = <T extends { id: number, tenvutainan: string }>({ renderItem, fetchData, keyword }: CustomFlatListProps<T>) => {
+const CustomFlatList = <T extends { id: number,tenvutainan: string}>({ renderItem, fetchData, keyword, reloadCounter }: CustomFlatListProps<T>) => {
     const [data, setData] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [isEndReached, setIsEndReached] = useState(false);
 
-    useEffect(() => {
+    const [reload, setReload] = useState(0);
 
+    useEffect(() => {
         fetchNextData();
+
+        return () => {
+
+        };
     }, [page]);
+
+    useEffect(() => {
+        setReload(reloadCounter);
+        if (reloadCounter > reload && reloadCounter > 1) {
+            setData([]);
+            setIsLoading(false);
+            setIsEndReached(false);
+            setPage(1);
+        }
+    }, [reloadCounter]);
 
     const fetchNextData = async () => {
         if (isLoading || isEndReached) {
@@ -29,7 +45,11 @@ const CustomFlatList = <T extends { id: number, tenvutainan: string }>({ renderI
         const newData = await fetchData(page);
 
         if (newData && newData.length > 0) {
-            setData((prevData) => [...prevData, ...newData]);
+            setData((prevData) => {
+                if (page == 1)
+                    return [...newData];
+                return [...prevData, ...newData];
+            });
             setPage((prevPage) => prevPage + 1);
         } else {
             setIsEndReached(true);
@@ -47,12 +67,8 @@ const CustomFlatList = <T extends { id: number, tenvutainan: string }>({ renderI
             );
         }
 
-        if (!isLoading && data.length > 0 && isEndReached) {
-            return (
-                <View style={{ paddingVertical: 20 }}>
-                    <Text style={{ textAlign: 'center' }}>Đã đến cuối danh sách!</Text>
-                </View>
-            );
+        if (!isLoading && isEndReached) {
+            return <Text style={{ textAlign: 'center' }}>Đã đến cuối danh sách!</Text>
         }
 
         return null;
@@ -68,6 +84,7 @@ const CustomFlatList = <T extends { id: number, tenvutainan: string }>({ renderI
         <FlatList
             style={{ flex: 1 }}
             data={keyword ? data.filter(x => x.tenvutainan.toLowerCase().includes(keyword.toLocaleLowerCase())) : data}
+            // data={data}
             renderItem={renderItem}
             keyExtractor={(item) => item.id.toString()}
             ListFooterComponent={renderFooter}
@@ -80,6 +97,7 @@ const CustomFlatList = <T extends { id: number, tenvutainan: string }>({ renderI
 
 export default CustomFlatList;
 
+//===
 export const CustomFlatList2 = <T extends { MaPhanAnh: string }>({ renderItem, fetchData }: CustomFlatListProps<T>) => {
     const [data, setData] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -141,4 +159,3 @@ export const CustomFlatList2 = <T extends { MaPhanAnh: string }>({ renderItem, f
         />
     );
 };
-

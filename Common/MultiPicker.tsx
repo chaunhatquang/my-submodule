@@ -4,11 +4,13 @@ import { View, StyleSheet, Text } from 'react-native';
 import axios from 'axios';
 import { Dropdown } from "react-native-element-dropdown";
 import { fetchData } from '../Services/api';
+import { Button } from '@rneui/themed';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const config = require('../Config/config.json');
 const URL = config.BASE_URL;
 
-const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit, onChangeValue }: { endpointsParams: any, label: string, value: string, placeholder: string, edit: boolean, onChangeValue: (item: any) => void }) => {
+const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit,labelButton,onChangeValue,handlePressButton,show }: { endpointsParams: any, label: string, value: string, placeholder: string, edit: boolean,labelButton: string,onChangeValue: (item: any) => void, handlePressButton: () => void,show: boolean }) => {
     const [pickerData, setPickerData] = useState<any[]>([]);
     const [isFocus, setIsFocus] = useState(false);
 
@@ -50,6 +52,11 @@ const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit, onCha
                 onBlur={() => setIsFocus(false)}
                 onChange={item => onChangeValue(item)}
             />
+            {show && <TouchableOpacity onPress={() => handlePressButton()}>
+                <View style={styles.containerButton}>
+                    <Text style={styles.reportText}>{labelButton}</Text>
+                </View>
+            </TouchableOpacity>}
         </View>
     )
 }
@@ -57,6 +64,13 @@ const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit, onCha
 export default DynamicPicker;
 
 const styles = StyleSheet.create({
+    container: {
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly'
+        // padding: 8,
+    },
     title: {
         fontSize: 15,
         color: 'black'
@@ -82,19 +96,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         marginVertical: 20
     },
-    container: {
-        backgroundColor: 'white',
-        // padding: 8,
-    },
     dropdown: {
-        height: 45,
+        height: 40,
         borderColor: 'gray',
         borderWidth: 0.5,
-        backgroundColor: 'white',
+        backgroundColor: '#EDEDED',
         borderRadius: 8,
-        marginHorizontal: 10,
-        marginVertical: 8,
-        paddingLeft: 10
+        // marginHorizontal: 10,
+        // marginVertical: 8,
+        padding: 10,
+        flex: 1
     },
     label: {
         position: 'absolute',
@@ -104,5 +115,20 @@ const styles = StyleSheet.create({
         zIndex: 999,
         paddingHorizontal: 8,
         fontSize: 14,
+    },
+    reportText: {
+        fontSize: 15,
+        color: 'white',
+        // fontWeight: 'bold',
+    },
+    containerButton: {
+        backgroundColor: '#4487D5',
+        borderWidth: 1,
+        borderColor: 'black',
+        padding: 8,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 10
     },
 });

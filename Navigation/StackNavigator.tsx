@@ -12,6 +12,8 @@ import { ImageScreen } from '../Common/ImageScreen';
 import AddMultiImageAccident from '../../screens/TrafficAccident/AddMultiImage';
 import MapWithMarker from '../MapPicker/map_with_marker';
 import EditAccident from '../../screens/TrafficAccident/EditAccident';
+import Report from '../../screens/TrafficAccident/Report';
+import HeadersButton from '../../screens/TrafficAccident/HeadersButton';
 
 const Stack = createStackNavigator();
 
@@ -19,21 +21,27 @@ function StackNavigator(token: any) {
     const navigation = useNavigation<any>();
 
     return (
-        <Stack.Navigator initialRouteName='homepage'>
+        <Stack.Navigator initialRouteName='headers_button'>
             <Stack.Screen
                 name="plant_list"
                 component={Homepage}
-                options={{
-                    title: 'Giao thông', headerRight: () =>
-                        <TouchableOpacity onPress={() => navigation.navigate('map_with_marker')}>
-                            <View style={{ flexDirection: 'row' }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 10 }}>
-                                    <Ionicons style={{ marginRight: 5 }} name="warning-outline" size={23} color={'red'} />
-                                    <Text style={{ color: 'red' }}>Bản đồ TNGT</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                }}
+                // options={{
+                //     title: 'Giao thông', headerRight: () =>
+                //         <TouchableOpacity onPress={() => navigation.navigate('map_with_marker')}>
+                //             <View style={{ flexDirection: 'row' }}>
+                //                 <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 10 }}>
+                //                     <Ionicons style={{ marginRight: 5 }} name="warning-outline" size={23} color={'red'} />
+                //                     <Text style={{ color: 'red' }}>Bản đồ TNGT</Text>
+                //                 </View>
+                //             </View>
+                //         </TouchableOpacity>
+                // }}
+                initialParams={{ token: token }}
+            />
+            <Stack.Screen
+                name="headers_button"
+                component={HeadersButton}
+                options={{ title: 'Tai nạn giao thông', headerShown: true }}
                 initialParams={{ "token": token }}
             />
             <Stack.Screen
@@ -75,6 +83,11 @@ function StackNavigator(token: any) {
                 name="edit_accident"
                 component={EditAccident}
                 options={{ title: 'Giao thông', headerShown: true }}
+            />
+            <Stack.Screen
+                name="report"
+                component={Report}
+                options={{ title: 'Tai nạn giao thông', headerShown: true }}
             />
         </Stack.Navigator>
     );

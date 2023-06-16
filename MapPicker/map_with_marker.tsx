@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import FastImage from "react-native-fast-image";
 import { ITrafficAccident } from "../../../define";
 import { fetchData } from "../Services/api";
+import { renderLoadingIndicator } from "../Utils/LoadingIndicator";
 
 let config = require("../Config/config.json");
 const URL = config.BASE_URL;
@@ -16,6 +17,7 @@ const MapWithMarker = () => {
     const [markers, setMarkers] = useState<ITrafficAccident[]>([]);
     const mapRef = useRef(null);
     const navigation = useNavigation<any>();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchAllMarkers();
@@ -33,12 +35,13 @@ const MapWithMarker = () => {
                 "loaiphuongtien": "0",
                 "tuyenduong": "0",
                 "nguyennhan": "0"
-                },
+            },
             "page": "1",
             "perpage": "500"
-            }
-
+        }
+        setLoading(true);
         const res: any = await fetchData(URL, params);
+        setLoading(false);
         const { code, message, data } = res;
         if (code === 0) {
             setMarkers(data);
@@ -55,13 +58,13 @@ const MapWithMarker = () => {
 
     const CustomMarker = () => (
         <View>
-            <FastImage source={{uri: 'https://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident.png'}} style={{width: 40,height: 40}} resizeMode="cover" />
+            <FastImage source={{ uri: 'https://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident.png' }} style={{ width: 25, height: 25 }} resizeMode="cover" />
         </View>
     )
 
     return (
         <View style={styles.container}>
-            <MapView
+            {loading && isMapReady ? renderLoadingIndicator() : <MapView
                 ref={mapRef}
                 style={styles.map}
                 showsUserLocation={true}
@@ -79,10 +82,10 @@ const MapWithMarker = () => {
                         <CustomMarker />
                     </Marker>
                 ))}
-            </MapView>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+            </MapView>}
+            {/* <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
                 <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     )
 }
