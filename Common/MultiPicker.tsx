@@ -1,16 +1,34 @@
-// MultiPicker.tsx
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import axios from 'axios';
-import { Dropdown } from "react-native-element-dropdown";
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { fetchData } from '../Services/api';
-import { Button } from '@rneui/themed';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+
+interface DynamicPickerProps {
+    endpointsParams: any;
+    label: string;
+    value: string;
+    placeholder: string;
+    edit: boolean;
+    labelButton: string;
+    onChangeValue: (item: any) => void;
+    handlePressButton: () => void;
+    show: boolean;
+}
 
 const config = require('../Config/config.json');
 const URL = config.BASE_URL;
 
-const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit,labelButton,onChangeValue,handlePressButton,show }: { endpointsParams: any, label: string, value: string, placeholder: string, edit: boolean,labelButton: string,onChangeValue: (item: any) => void, handlePressButton: () => void,show: boolean }) => {
+const DynamicPicker: React.FC<DynamicPickerProps> = ({
+    endpointsParams,
+    label,
+    value,
+    placeholder,
+    edit,
+    labelButton,
+    onChangeValue,
+    handlePressButton,
+    show,
+}) => {
     const [pickerData, setPickerData] = useState<any[]>([]);
     const [isFocus, setIsFocus] = useState(false);
 
@@ -31,10 +49,14 @@ const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit,labelB
         fetchPickerApi();
     }, [endpointsParams]);
 
+    const handleValueChange = (item: any) => {
+        onChangeValue(item);
+    };
+
     return (
         <View style={styles.container}>
             <Dropdown
-                style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                style={[styles.dropdown, isFocus && { borderColor: 'red' }]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
@@ -45,90 +67,65 @@ const DynamicPicker = ({ endpointsParams, label, value, placeholder, edit,labelB
                 disable={edit}
                 labelField={label}
                 valueField={value}
-                placeholder={!isFocus ? placeholder : '...'}
+                placeholder={placeholder}
                 searchPlaceholder="Tìm..."
                 value={value}
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
-                onChange={item => onChangeValue(item)}
+                onChange={handleValueChange}
             />
-            {show && <TouchableOpacity onPress={() => handlePressButton()}>
-                <View style={styles.containerButton}>
-                    <Text style={styles.reportText}>{labelButton}</Text>
-                </View>
-            </TouchableOpacity>}
+            {show && (
+                <TouchableOpacity onPress={() => handlePressButton()}>
+                    <View style={styles.containerButton}>
+                        <Text style={styles.reportText}>{labelButton}</Text>
+                    </View>
+                </TouchableOpacity>
+            )}
         </View>
-    )
-}
-
-export default DynamicPicker;
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
+        marginBottom: 16,
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-evenly'
-        // padding: 8,
-    },
-    title: {
-        fontSize: 15,
-        color: 'black'
-    },
-    placeholderStyle: {
-        fontSize: 16,
-        paddingLeft: 10
-    },
-    selectedTextStyle: {
-        fontSize: 16,
-    },
-    iconStyle: {
-        width: 20,
-        height: 20,
-    },
-    inputSearchStyle: {
-        height: 40,
-        fontSize: 15,
-    },
-    borderbg: {
-        borderWidth: 0.3,
-        borderRadius: 3,
-        backgroundColor: '#f8f8f8',
-        marginVertical: 20
+        alignItems: 'center'
     },
     dropdown: {
         height: 40,
-        borderColor: 'gray',
-        borderWidth: 0.5,
-        backgroundColor: '#EDEDED',
+        borderWidth: 0.4,
         borderRadius: 8,
-        // marginHorizontal: 10,
-        // marginVertical: 8,
-        padding: 10,
+        paddingHorizontal: 8,
         flex: 1
     },
-    label: {
-        position: 'absolute',
-        backgroundColor: 'white',
-        left: 22,
-        top: 8,
-        zIndex: 999,
-        paddingHorizontal: 8,
-        fontSize: 14,
+    placeholderStyle: {
+        color: 'gray',
+        fontSize: 15
     },
-    reportText: {
-        fontSize: 15,
-        color: 'white',
-        // fontWeight: 'bold',
+    selectedTextStyle: {
+        color: 'black',
+        fontSize: 15
+    },
+    inputSearchStyle: {
+        color: 'black',
+    },
+    iconStyle: {
+        tintColor: 'gray',
     },
     containerButton: {
-        backgroundColor: '#4487D5',
-        borderWidth: 1,
-        borderColor: 'black',
-        padding: 8,
+        backgroundColor: 'blue',
+        padding: 10,
         borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 10
+        marginLeft: 8
+    },
+    reportText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
     },
 });
+
+export default DynamicPicker;

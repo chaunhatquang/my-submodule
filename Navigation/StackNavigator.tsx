@@ -25,6 +25,7 @@ function StackNavigator(token: any) {
             <Stack.Screen
                 name="plant_list"
                 component={Homepage}
+                options={{ title: 'Tai nạn giao thông', headerShown: true }}
                 // options={{
                 //     title: 'Giao thông', headerRight: () =>
                 //         <TouchableOpacity onPress={() => navigation.navigate('map_with_marker')}>

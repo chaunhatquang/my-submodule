@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Callout, Marker } from "react-native-maps";
 import Toast from "react-native-root-toast";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
@@ -8,6 +8,7 @@ import FastImage from "react-native-fast-image";
 import { ITrafficAccident } from "../../../define";
 import { fetchData } from "../Services/api";
 import { renderLoadingIndicator } from "../Utils/LoadingIndicator";
+import WebView from "react-native-webview";
 
 let config = require("../Config/config.json");
 const URL = config.BASE_URL;
@@ -78,14 +79,18 @@ const MapWithMarker = () => {
                 }}
             >
                 {markers.map(marker => (
-                    <Marker key={marker.sttbanghi} coordinate={{ latitude: Number(marker.vido), longitude: Number(marker.kinhdo) }} title={marker.tenvutainan} description={marker.tendiabanxayra}>
-                        <CustomMarker />
+                    <Marker key={marker.sttbanghi} image={{ uri: 'http://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident_resize_edit_1.png' }} coordinate={{ latitude: Number(marker.vido), longitude: Number(marker.kinhdo) }}>
+                        <Callout tooltip onPress={() => marker.sgtvt_luoihinhanhtngt.length === 0? null : navigation.navigate('image_viewer', { urlImages: marker.sgtvt_luoihinhanhtngt })}>
+                            <View style={styles.bubble} >
+                                <Text>
+                                    <Image resizeMode="cover" source={{ uri: marker.sgtvt_luoihinhanhtngt.length === 0 ? 'https://quang.bf.edu.vn/ImageUpload/No_Image.jpg' : marker.sgtvt_luoihinhanhtngt[0].anhdinhkem }} style={[styles.image, { width: 180, height: 150 }]} />
+                                </Text>
+                                <Text style={styles.text}>{marker.tenvutainan}</Text>
+                            </View>
+                        </Callout>
                     </Marker>
                 ))}
             </MapView>}
-            {/* <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-                <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity> */}
         </View>
     )
 }
@@ -113,5 +118,37 @@ const styles = StyleSheet.create({
         width: 50, // Kích thước chiều rộng của marker
         height: 50, // Kích thước chiều cao của marker
     },
+    plainView: {
+        // width: '25%',
+    },
+    calloutContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        // padding: 2,
+    },
+    image: {
+        width: 200,
+        height: 80,
+        marginBottom: 25,
+    },
+    text: {
+        fontSize: 16,
+        // width: '50%',
+        padding: 10
+    },
+    markerImage: {
+        width: 30, // Định nghĩa kích thước mới cho hình ảnh marker
+        height: 30,
+    },
+    bubble: {
+        // flexDirection: 'rowco',
+        alignSelf: 'flex-start',
+        backgroundColor: '#fff',
+        borderRadius: 6,
+        borderColor: '#ccc',
+        borderWidth: 0.5,
+        padding: 10,
+        width: '80%',
+    }
 });
 
