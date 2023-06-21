@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 interface InputProps {
-    placeholder: string;
+    placeholder?: string;
     value: string,
     keyType?: any
-    handleInputChange: (text: string) => void;
+    handleInputChange: (text: string) => void | null;
+    editable?: boolean;
+    label?: string | null
 }
 
-const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange,keyType }) => {
+const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange, keyType, editable, label }) => {
     const [isFocus, setIsFocus] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
 
@@ -20,10 +22,11 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
 
     const handleTextInputFocus = () => {
         setIsChecking(true);
-      };
+    };
 
     return (
         <View style={styles.container}>
+            {label && <Text style={styles.label}>{label}</Text>}
             <TextInput
                 style={styles.input}
                 value={value}
@@ -32,6 +35,7 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
                 keyboardType={keyType}
                 onFocus={handleTextInputFocus}
                 placeholderTextColor='#999'
+                editable={editable}
             />
             {isFocus && <Text style={styles.errorText}>Vui lòng nhập {placeholder}</Text>}
         </View>
@@ -40,7 +44,7 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 16,
+        marginBottom: 20,
     },
     input: {
         height: 40,
@@ -48,7 +52,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 8,
-        fontSize: 15
+        fontSize: 15,
+        color: 'black'
     },
     inputError: {
         borderColor: 'red',
@@ -57,7 +62,10 @@ const styles = StyleSheet.create({
         color: 'red',
         fontSize: 13,
     },
-
+    label: {
+        fontSize: 15,
+        marginBottom: 5,
+    },
 });
 
 

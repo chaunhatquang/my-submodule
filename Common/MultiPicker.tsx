@@ -87,14 +87,14 @@ const DynamicPicker: React.FC<DynamicPickerProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 16,
+        marginBottom: 20,
         flexDirection: 'row',
         alignItems: 'center'
     },
     dropdown: {
         height: 40,
         borderWidth: 0.4,
-        borderRadius: 8,
+        borderRadius: 5,
         paddingHorizontal: 8,
         flex: 1
     },

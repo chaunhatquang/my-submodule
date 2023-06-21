@@ -26,17 +26,6 @@ function StackNavigator(token: any) {
                 name="plant_list"
                 component={Homepage}
                 options={{ title: 'Tai nạn giao thông', headerShown: true }}
-                // options={{
-                //     title: 'Giao thông', headerRight: () =>
-                //         <TouchableOpacity onPress={() => navigation.navigate('map_with_marker')}>
-                //             <View style={{ flexDirection: 'row' }}>
-                //                 <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 10 }}>
-                //                     <Ionicons style={{ marginRight: 5 }} name="warning-outline" size={23} color={'red'} />
-                //                     <Text style={{ color: 'red' }}>Bản đồ TNGT</Text>
-                //                 </View>
-                //             </View>
-                //         </TouchableOpacity>
-                // }}
                 initialParams={{ token: token }}
             />
             <Stack.Screen
@@ -63,7 +52,7 @@ function StackNavigator(token: any) {
             <Stack.Screen
                 name="detail_accident"
                 component={DetailAccident}
-                options={{ title: 'Chi tiết TNGT' }}
+                options={{ title: 'Chi tiết vụ tai nạn' }}
             />
             <Stack.Screen
                 name="image_viewer"
@@ -73,7 +62,7 @@ function StackNavigator(token: any) {
             <Stack.Screen
                 name="add_multi_image"
                 component={AddMultiImageAccident}
-                options={{ title: 'Thêm hình ảnh TNGT', headerShown: true }}
+                options={{ title: 'Thêm hình ảnh tai nạn', headerShown: true }}
             />
             <Stack.Screen
                 name="map_with_marker"
