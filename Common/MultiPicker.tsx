@@ -87,6 +87,7 @@ const DynamicPicker: React.FC<DynamicPickerProps> = ({
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         marginBottom: 20,
         flexDirection: 'row',
         alignItems: 'center'

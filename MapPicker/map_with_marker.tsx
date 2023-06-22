@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Callout, Marker } from "react-native-maps";
 import Toast from "react-native-root-toast";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -9,6 +9,8 @@ import { ITrafficAccident } from "../../../define";
 import { fetchData } from "../Services/api";
 import { renderLoadingIndicator } from "../Utils/LoadingIndicator";
 import WebView from "react-native-webview";
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { handleDirecttionWithPlatform } from "../Common/Direction";
 
 let config = require("../Config/config.json");
 const URL = config.BASE_URL;
@@ -19,6 +21,9 @@ const MapWithMarker = () => {
     const mapRef = useRef(null);
     const navigation = useNavigation<any>();
     const [loading, setLoading] = useState(false);
+    const [selectedMarker, setSelectedMarker] = useState<ITrafficAccident | null>();
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         fetchAllMarkers();
@@ -57,17 +62,31 @@ const MapWithMarker = () => {
         setIsMapReady(true);
     }
 
-    const CustomMarker = () => (
-        <View>
-            <FastImage source={{ uri: 'https://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident.png' }} style={{ width: 25, height: 25 }} resizeMode="cover" />
-        </View>
-    )
+    const handleMarkerPress = (marker: ITrafficAccident) => {
+        setSelectedMarker(marker);
+        setModalVisible(true);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedMarker(null);
+        setModalVisible(false);
+    };
+
+    const handleMapPress = () => {
+        if (modalVisible) {
+            handleCloseModal();
+        }
+    };
+
+    const windowHeight = Dimensions.get('window').height;
+    const modalHeight = windowHeight / 3;
 
     return (
         <View style={styles.container}>
             {loading && isMapReady ? renderLoadingIndicator() : <MapView
                 ref={mapRef}
                 style={styles.map}
+                onPress={handleMapPress}
                 showsUserLocation={true}
                 showsMyLocationButton={true}
                 onMapReady={() => onMapReady()}
@@ -79,19 +98,39 @@ const MapWithMarker = () => {
                 }}
             >
                 {markers.map(marker => (
-                    <Marker key={marker.sttbanghi} image={{ uri: 'http://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident_resize_edit_1.png' }} coordinate={{ latitude: Number(marker.vido), longitude: Number(marker.kinhdo) }}>
-                        <Callout tooltip onPress={() => marker.sgtvt_luoihinhanhtngt.length === 0? null : navigation.navigate('image_viewer', { urlImages: marker.sgtvt_luoihinhanhtngt })}>
-                            <View style={styles.bubble} >
-                                <Text>
-                                    <Image resizeMode="cover" source={{ uri: marker.sgtvt_luoihinhanhtngt.length === 0 ? 'https://quang.bf.edu.vn/ImageUpload/No_Image.jpg' : marker.sgtvt_luoihinhanhtngt[0].anhdinhkem }} style={[styles.image, { width: 180, height: 150 }]} />
-                                </Text>
-                                <Text style={styles.text}>{marker.tenvutainan}</Text>
-                            </View>
-                        </Callout>
-                    </Marker>
+                    <Marker onPress={() => handleMarkerPress(marker)} key={marker.sttbanghi} image={{ uri: 'http://quang.bf.edu.vn/ImageUpload/TNGT/marker_accident_resize_edit_1.png' }} coordinate={{ latitude: Number(marker.vido), longitude: Number(marker.kinhdo) }}></Marker>
                 ))}
-            </MapView>}
-        </View>
+            </MapView>
+            }
+            {selectedMarker && (
+                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: modalHeight }}>
+                    <View style={{ flex: 1, backgroundColor: 'white', padding: 20 }}>
+                        <Text numberOfLines={2} style={styles.text}>{selectedMarker.tenvutainan}</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('image_viewer', { urlImages: selectedMarker.sgtvt_luoihinhanhtngt })}>
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color="red" />
+                            ) : (
+                                <FastImage
+                                    resizeMode="cover"
+                                    source={{
+                                        uri:
+                                            selectedMarker.sgtvt_luoihinhanhtngt.length === 0
+                                                ? 'https://quang.bf.edu.vn/ImageUpload/No_Image.jpg'
+                                                : selectedMarker.sgtvt_luoihinhanhtngt[0].anhdinhkem,
+                                    }}
+                                    style={{ width: '100%', height: 200, marginTop: 10 }}
+                                    // onLoadStart={() => setIsLoading(false)}
+                                    // onLoadEnd={() => setIsLoading(true)}
+                                />
+                            )}
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleDirecttionWithPlatform(selectedMarker.vido, selectedMarker.kinhdo, selectedMarker.tenvutainan)} style={{ position: 'absolute', top: 10, right: 20 }}>
+                            <FontAwesome5 name="directions" size={32} color="blue" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+        </View >
     )
 }
 
@@ -133,8 +172,8 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 16,
-        // width: '50%',
-        padding: 10
+        color: 'blue',
+        width: '90%'
     },
     markerImage: {
         width: 30, // Định nghĩa kích thước mới cho hình ảnh marker
