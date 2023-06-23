@@ -107,25 +107,22 @@ const MapWithMarker = () => {
                     <View style={{ flex: 1, backgroundColor: 'white', padding: 20 }}>
                         <Text numberOfLines={2} style={styles.text}>{selectedMarker.tenvutainan}</Text>
                         <TouchableOpacity onPress={() => navigation.navigate('image_viewer', { urlImages: selectedMarker.sgtvt_luoihinhanhtngt })}>
-                            {isLoading ? (
-                                <ActivityIndicator size="small" color="red" />
-                            ) : (
-                                <FastImage
-                                    resizeMode="cover"
-                                    source={{
-                                        uri:
-                                            selectedMarker.sgtvt_luoihinhanhtngt.length === 0
-                                                ? 'https://quang.bf.edu.vn/ImageUpload/No_Image.jpg'
-                                                : selectedMarker.sgtvt_luoihinhanhtngt[0].anhdinhkem,
-                                    }}
-                                    style={{ width: '100%', height: 200, marginTop: 10 }}
-                                    // onLoadStart={() => setIsLoading(false)}
-                                    // onLoadEnd={() => setIsLoading(true)}
-                                />
-                            )}
+                            <FastImage
+                                resizeMode="cover"
+                                source={{
+                                    uri:
+                                        selectedMarker.sgtvt_luoihinhanhtngt.length === 0
+                                            ? 'https://quang.bf.edu.vn/ImageUpload/No_Image.jpg'
+                                            : selectedMarker.sgtvt_luoihinhanhtngt[0].anhdinhkem,
+                                }}
+                                style={styles.image}
+                            />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDirecttionWithPlatform(selectedMarker.vido, selectedMarker.kinhdo, selectedMarker.tenvutainan)} style={{ position: 'absolute', top: 10, right: 20 }}>
-                            <FontAwesome5 name="directions" size={32} color="blue" />
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                        <TouchableOpacity style={styles.directionButton} onPress={() => handleDirecttionWithPlatform(selectedMarker.vido, selectedMarker.kinhdo, selectedMarker.tenvutainan)}>
+                            <FontAwesome5 name="directions" size={20} color="white" style={styles.icon} />
+                            <Text style={styles.textDirection}>Chỉ đường</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -143,6 +140,9 @@ const styles = StyleSheet.create({
     },
     map: {
         flex: 1,
+    },
+    icon: {
+        marginRight: 5,
     },
     button: {
         position: 'absolute',
@@ -166,28 +166,29 @@ const styles = StyleSheet.create({
         // padding: 2,
     },
     image: {
-        width: 200,
-        height: 80,
-        marginBottom: 25,
+        width: '100%',
+        height: 200,
+        marginTop: 10,
+        borderRadius: 8,
     },
     text: {
         fontSize: 16,
         color: 'blue',
         width: '90%'
     },
-    markerImage: {
-        width: 30, // Định nghĩa kích thước mới cho hình ảnh marker
-        height: 30,
+    directionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 30,
+        marginBottom: 8,
+        backgroundColor: 'blue',
+        borderRadius: 8,
+        padding: 8,
     },
-    bubble: {
-        // flexDirection: 'rowco',
-        alignSelf: 'flex-start',
-        backgroundColor: '#fff',
-        borderRadius: 6,
-        borderColor: '#ccc',
-        borderWidth: 0.5,
-        padding: 10,
-        width: '80%',
-    }
+    textDirection: {
+        color: 'white',
+        fontSize: 16,
+    },
 });
 

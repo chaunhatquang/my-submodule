@@ -14,6 +14,7 @@ import MapWithMarker from '../MapPicker/map_with_marker';
 import EditAccident from '../../screens/TrafficAccident/EditAccident';
 import Report from '../../screens/TrafficAccident/Report';
 import HeadersButton from '../../screens/TrafficAccident/HeadersButton';
+import MapDetail from '../../screens/DetailMap';
 
 const Stack = createStackNavigator();
 
@@ -78,6 +79,11 @@ function StackNavigator(token: any) {
                 name="report"
                 component={Report}
                 options={{ title: 'Tai nạn giao thông', headerShown: true }}
+            />
+            <Stack.Screen
+                name="map_detail"
+                component={MapDetail}
+                options={{ title: 'Bản đồ tai nạn giao thông', headerShown: true }}
             />
         </Stack.Navigator>
     );
