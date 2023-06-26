@@ -13,6 +13,7 @@ interface DynamicPickerProps {
     onChangeValue: (item: any) => void;
     handlePressButton: () => void;
     show: boolean;
+    addItemAllInPickerData?: boolean,
 }
 
 const config = require('../Config/config.json');
@@ -28,6 +29,7 @@ const DynamicPicker: React.FC<DynamicPickerProps> = ({
     onChangeValue,
     handlePressButton,
     show,
+    addItemAllInPickerData,
 }) => {
     const [pickerData, setPickerData] = useState<any[]>([]);
     const [isFocus, setIsFocus] = useState(false);
@@ -37,7 +39,18 @@ const DynamicPicker: React.FC<DynamicPickerProps> = ({
             try {
                 const res: any = await fetchData(URL, endpointsParams);
                 if (res && res.data) {
-                    setPickerData(res.data);
+                    const addNewItem0 = {
+                        sttbanghi: "6",
+                        "id": 0,
+                        "nambc": "Tất cả",
+                    }
+                    const pickerDataWithItem0 = [addNewItem0, ...res.data];
+                    const pickerData = res.data;
+                    if (addItemAllInPickerData) {
+                        setPickerData(pickerDataWithItem0);
+                    } else {
+                        setPickerData(pickerData);
+                    }
                 }
             } catch (error) {
                 if (__DEV__) {
@@ -97,7 +110,8 @@ const styles = StyleSheet.create({
         borderWidth: 0.4,
         borderRadius: 5,
         paddingHorizontal: 8,
-        flex: 1
+        flex: 1,
+        backgroundColor: 'white'
     },
     placeholderStyle: {
         color: 'gray',

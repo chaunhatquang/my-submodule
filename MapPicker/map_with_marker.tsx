@@ -11,6 +11,8 @@ import { renderLoadingIndicator } from "../Utils/LoadingIndicator";
 import WebView from "react-native-webview";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { handleDirecttionWithPlatform } from "../Common/Direction";
+import DynamicPicker from "../Common/MultiPicker";
+import { paramsYear } from "../../screens/Params";
 
 let config = require("../Config/config.json");
 const URL = config.BASE_URL;
@@ -24,10 +26,23 @@ const MapWithMarker = () => {
     const [selectedMarker, setSelectedMarker] = useState<ITrafficAccident | null>();
     const [modalVisible, setModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedYear, setSelectedYear] = useState<string | null>("2");
+    const [yearValue, setYearValue] = useState<string | null>("2023");
+
+    // useEffect(() => {
+    //     fetchAllMarkers();
+    //     return () => {
+
+    //     }
+    // }, [])
 
     useEffect(() => {
-        fetchAllMarkers();
-    }, [])
+        fetchAllMarkersByYear(selectedYear!);
+        setSelectedMarker(null);
+        return () => {
+
+        }
+    }, [selectedYear])
 
     const fetchAllMarkers = async () => {
         const params = {
@@ -40,7 +55,38 @@ const MapWithMarker = () => {
                 "thoigian": "0",
                 "loaiphuongtien": "0",
                 "tuyenduong": "0",
-                "nguyennhan": "0"
+                "nguyennhan": "0",
+                "nam": "2"
+            },
+            "page": "1",
+            "perpage": "500"
+        }
+        setLoading(true);
+        const res: any = await fetchData(URL, params);
+        setLoading(false);
+        const { code, message, data } = res;
+        if (code === 0) {
+            setMarkers(data);
+        } else {
+            setMarkers([]);
+            Toast.show(message);
+            return;
+        }
+    }
+
+    const fetchAllMarkersByYear = async (year: string) => {
+        const params = {
+            "serviceid": "5hmQQTMsGrNmA86vcBj11A==",
+            "thamso": {
+                "tukhoa": "",
+                "loaitngt": "0",
+                "mucdo": "0",
+                "diabanxayra": "0",
+                "thoigian": "0",
+                "loaiphuongtien": "0",
+                "tuyenduong": "0",
+                "nguyennhan": "0",
+                "nam": year
             },
             "page": "1",
             "perpage": "500"
@@ -102,8 +148,29 @@ const MapWithMarker = () => {
                 ))}
             </MapView>
             }
+            {!loading && <View style={styles.dynamicPickerContainer}>
+                <DynamicPicker
+                    placeholder={`${yearValue}`}
+                    endpointsParams={paramsYear}
+                    label={"nambc"}
+                    value={"id"}
+                    onChangeValue={(item) => {
+                        const idYear = item?.id.toString();
+                        const name = item?.nambc;
+                        setYearValue(name);
+                        setSelectedYear(idYear);
+                    }}
+                    edit={false}
+                    labelButton={""}
+                    handlePressButton={function (): void {
+                        throw new Error("Function not implemented.");
+                    }}
+                    show={false}
+                    addItemAllInPickerData={true}
+                />
+            </View>}
             {selectedMarker && (
-                <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: modalHeight }}>
+                <View style={{ backgroundColor: 'white', position: 'absolute', bottom: 0, left: 0, right: 0, height: modalHeight }}>
                     <View style={{ flex: 1, backgroundColor: 'white', padding: 20 }}>
                         <Text numberOfLines={2} style={styles.text}>{selectedMarker.tenvutainan}</Text>
                         <TouchableOpacity onPress={() => navigation.navigate('image_viewer', { urlImages: selectedMarker.sgtvt_luoihinhanhtngt })}>
@@ -189,6 +256,13 @@ const styles = StyleSheet.create({
     textDirection: {
         color: 'white',
         fontSize: 16,
+    },
+    dynamicPickerContainer: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        zIndex: 1,
+        width: '30%',
     },
 });
 
