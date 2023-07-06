@@ -9,9 +9,10 @@ interface InputProps {
     editable?: boolean;
     label?: string | null
     multiline?: boolean;
+    // rest: any
 }
 
-const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange, keyType, editable, label,multiline}) => {
+const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange, keyType, editable, label,multiline,...rest}) => {
     const [isFocus, setIsFocus] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
 
@@ -38,6 +39,7 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
                 placeholderTextColor='#999'
                 editable={editable}
                 multiline={multiline}
+                {...rest}
             />
             {isFocus && <Text style={styles.errorText}>Vui lòng nhập {placeholder}</Text>}
         </View>
