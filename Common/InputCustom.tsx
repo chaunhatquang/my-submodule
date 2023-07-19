@@ -31,7 +31,7 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
             {label && <Text style={styles.label}>{label}</Text>}
             <TextInput
                 style={styles.input}
-                value={value.slice(0,40)}
+                value={value}
                 onChangeText={handleInputChange}
                 placeholder={placeholder}
                 keyboardType={keyType}

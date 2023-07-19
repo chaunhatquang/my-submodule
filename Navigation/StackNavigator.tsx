@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import ViewFile from '../Common/view_file';
 import Homepage from '../../screens/TrafficAccident/HomePage';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Button, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MapPicker from '../MapPicker/map_picker';
 import AddNewAccident from '../../screens/TrafficAccident/AddNewAccident';
@@ -15,11 +15,27 @@ import EditAccident from '../../screens/TrafficAccident/EditAccident';
 import Report from '../../screens/TrafficAccident/Report';
 import HeadersButton from '../../screens/TrafficAccident/HeadersButton';
 import MapDetail from '../../screens/DetailMap';
+import HuesReactNativeModule from 'hues-react-native-module';
 
 const Stack = createStackNavigator();
 
 function StackNavigator(token: any) {
     const navigation = useNavigation<any>();
+
+    const handlerBack = () => {
+        if (navigation.canGoBack()) {
+            navigation.goBack();
+        } else {
+            Alert.alert('Không có màn hình trước đó,quay lại Hue-S');
+            // HuesReactNativeModule.goBack();
+        }
+    }
+
+    const renderHeaderLeft = () => {
+        return (
+            <Ionicons name='chevron-back' size={32} onPress={handlerBack} style={{ marginHorizontal: 5 }} />
+        );
+    };
 
     return (
         <Stack.Navigator initialRouteName='headers_button'>
@@ -32,7 +48,11 @@ function StackNavigator(token: any) {
             <Stack.Screen
                 name="headers_button"
                 component={HeadersButton}
-                options={{ title: 'Tai nạn giao thông', headerShown: true }}
+                options={{
+                    title: 'Tai nạn giao thông',
+                    headerShown: true,
+                    headerLeft: renderHeaderLeft
+                }}
                 initialParams={{ "token": token }}
             />
             <Stack.Screen

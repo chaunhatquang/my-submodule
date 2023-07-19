@@ -6,19 +6,18 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { IAddressComponents, IResAddInfo } from "../../../define";
 import Toast from "react-native-root-toast";
-import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { useNavigation } from "@react-navigation/native";
 import { IPosition } from "../Utils/MyPosition";
 import { IResultAddComponent, getIDAddress } from "../Utils/GetIdAddress";
+import Geolocation from "@react-native-community/geolocation";
 import { getAddress } from "../Services/api";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-let config = require('../Config/config.json');
+let config = require("../../config/config.json");
 const MAP4D_URL = config.MAP4D_URL;
 const KEY_MAP4D = config.KEY_MAP4D;
 
-const MapPicker = ({ route }: { route: any }) => {
-    const { userInfos } = route.params;
+const MapPicker = () => {
+    // const { userInfos } = route.params;
     const [isMapReady, setIsMapReady] = useState(false);
     const [region, setRegion] = useState({
         latitude: 16.477468605596638,
@@ -35,32 +34,91 @@ const MapPicker = ({ route }: { route: any }) => {
     const [currentPosition, setCurrentPosition] = useState<any | null>(null);
 
     useEffect(() => {
-        const checkPermission = async () => {
+        const requestLocationPermission = async () => {
             if (Platform.OS === 'android') {
-                const granted = await PermissionsAndroid.check(
-                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-                );
-                if (!granted) {
-                    const status = await PermissionsAndroid.request(
-                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+                try {
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+                        {
+                            title: 'Ứng dụng cần quyền truy cập vị trí',
+                            message: 'Ứng dụng cần quyền truy cập vị trí để hoạt động chính xác.',
+                            buttonNeutral: 'Hỏi sau',
+                            buttonNegative: 'Hủy',
+                            buttonPositive: 'Đồng ý',
+                        },
                     );
-                    if (status === 'denied') {
-                        Toast.show("Ứng dụng không thể lấy vị trí hiện tại khi bạn không đồng ý");
-                        return;
+                    // Xử lý quyền truy cập vị trí cho Android ở đây...
+                    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                        Geolocation.getCurrentPosition(
+                            position => {
+                                const { latitude, longitude } = position.coords;
+                                setCurrentPosition({ latitude, longitude });
+                                if (mapRef.current) {
+                                    mapRef.current.animateToRegion({
+                                        latitude,
+                                        longitude,
+                                        latitudeDelta: 0.0922,
+                                        longitudeDelta: 0.0421,
+                                    });
+                                    convertCoordsToAddress(latitude, longitude);
+                                }
+                            },
+                            error => console.log(error),
+                            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+                        );
+
+                        const watchId = Geolocation.watchPosition(
+                            position => {
+                                const { latitude, longitude } = position.coords;
+                                setCurrentPosition({ latitude, longitude });
+                            },
+                            error => console.log(error),
+                            { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 10 },
+                        );
+
+                        // Clear the watch position when the component unmounts
+                        return () => Geolocation.clearWatch(watchId);
+                    } else {
+                        console.log('Ứng dụng không được cấp quyền truy cập vị trí.');
                     }
+                } catch (err) {
+                    console.warn(err);
                 }
+            } else {
+                // Xử lý quyền truy cập vị trí cho iOS ở đây (nếu cần)
+                Geolocation.getCurrentPosition(
+                    position => {
+                        const { latitude, longitude } = position.coords;
+                        setCurrentPosition({ latitude, longitude });
+                        if (mapRef.current) {
+                            mapRef.current.animateToRegion({
+                                latitude,
+                                longitude,
+                                latitudeDelta: 0.0922,
+                                longitudeDelta: 0.0421,
+                            });
+                            convertCoordsToAddress(latitude, longitude);
+                        }
+                    },
+                    error => console.log(error),
+                    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+                );
+
+                const watchId = Geolocation.watchPosition(
+                    position => {
+                        const { latitude, longitude } = position.coords;
+                        setCurrentPosition({ latitude, longitude });
+                    },
+                    error => console.log(error),
+                    { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 10 },
+                );
+
+                // Clear the watch position when the component unmounts
+                return () => Geolocation.clearWatch(watchId);
             }
-            Geolocation.getCurrentPosition(
-                position => {
-                    const { latitude, longitude } = position.coords;
-                    setCurrentPosition({ latitude, longitude });
-                    getNameAddress(latitude, longitude);
-                },
-                error => Toast.show(`Lỗi! ${error.message}`),
-                { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-            );
         };
-        checkPermission();
+
+        requestLocationPermission();
     }, [])
 
     const getAddressType = (result: any) => {
@@ -113,31 +171,6 @@ const MapPicker = ({ route }: { route: any }) => {
         return res;
     }
 
-    if (!currentPosition) {
-        return (
-            <SafeAreaView style={{ flex: 1 }}>
-                <ActivityIndicator size={'large'} color={'blue'} />
-                <View style={{ width: '30%', alignSelf: 'center', marginVertical: 30 }}>
-                    <Button title="Quay trở lại" onPress={() => navigation.goBack()}></Button>
-                </View>
-            </SafeAreaView>
-        )
-    }
-
-    const moveCameraToPosition = () => {
-        if (mapRef) {
-            mapRef.current.animateCamera({
-                center: {
-                    latitude: coords?.myLaitude,
-                    longitude: coords?.myLongitude
-                },
-                zoom: 14
-            },
-                { duration: 3000 }
-            );
-        }
-    }
-
     const convertCoordsToAddress = async (latitude: number, longitude: number) => {
         const params = {
             "key": KEY_MAP4D,
@@ -159,46 +192,30 @@ const MapPicker = ({ route }: { route: any }) => {
         }
     }
 
+    const handleMyLocationPress = () => {
+        if (currentPosition && mapRef.current) {
+            mapRef.current?.animateToRegion({
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            });
+        }
+    };
 
     const onMapReady = () => {
         setIsMapReady(true);
     }
 
     const handleConfirmPositions = () => {
-        if (userInfos === null) {
-            Toast.show("Lỗi! Không thể kiểm tra được quyền");
-        } else {
-            navigation.navigate('new_accident', { addressInfos: addressInfos, userInfos: userInfos });
-        }
+        navigation.navigate('plant_new', { addressInfos: addressInfos });
     }
 
     const onRegionChange = (region: any) => {
         const lat = region?.latitude;
         const long = region?.longitude;
-        setRegion(region);
         convertCoordsToAddress(lat, long);
-    }
-
-    const handleGetMyPosition = () => {
-        Geolocation.getCurrentPosition((position: GeoPosition) => {
-            let myPosition: IPosition = {};
-            if (position && position.coords) {
-                const laitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
-                myPosition = {
-                    myLaitude: laitude,
-                    myLongitude: longitude
-                }
-                setCoords(myPosition);
-            }
-        },
-            error => {
-                // See error code charts below.
-                console.log(error.code, error.message);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 },
-        );
-        moveCameraToPosition();
+        setRegion(region);
     }
 
     return (
@@ -210,21 +227,21 @@ const MapPicker = ({ route }: { route: any }) => {
                 showsMyLocationButton={true}
                 onRegionChangeComplete={onRegionChange}
                 initialRegion={{
-                    latitude: currentPosition.latitude,
-                    longitude: currentPosition.longitude,
+                    latitude: currentPosition?.latitude || 0,
+                    longitude: currentPosition?.longitude || 0,
                     latitudeDelta: 0.0922,
                     longitudeDelta: 0.0421,
                 }}
             >
             </MapView>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+            {/* <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
                 <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <View style={styles.mapMarkerContainer}>
                 <FontAwesome name="map-marker" size={40} color={'#ad1f1f'} />
             </View>
             <View style={styles.overlay}>
-                <InfoComponent address={nameAddress} loading={loading} handleGetMyPosition={() => handleGetMyPosition()} handleConfirmPositions={() => handleConfirmPositions()} />
+                <InfoComponent address={nameAddress} loading={loading} handleGetMyPosition={() => handleMyLocationPress()} handleConfirmPositions={() => handleConfirmPositions()} />
             </View>
         </View>
     )
@@ -242,7 +259,7 @@ const InfoComponent: React.FC<IAddInfoProps> = (props) => {
                     {Platform.OS === 'ios' ? <MaterialIcons name="my-location" size={23} color={'red'} /> : null}
                 </Pressable>
             </View>
-            {props.loading ? <ActivityIndicator size={'large'} /> : <View style={{ flexDirection: 'row' }}>
+            {props.loading ? <ActivityIndicator color={'red'} size={'small'} /> : <View style={{ flexDirection: 'row' }}>
                 <MaterialIcons name="location-pin" size={23} color={'blue'} />
                 <Text style={{ color: 'black', fontSize: 14, marginHorizontal: 10, width: '90%' }}>{props.address}</Text>
             </View>}
@@ -252,6 +269,62 @@ const InfoComponent: React.FC<IAddInfoProps> = (props) => {
         </View>
     )
 }
+
+const CheckGPS = () => {
+    const [gpsEnabled, setGpsEnabled] = useState(false);
+
+    // useEffect(() => {
+    //     const checkPermission = async () => {
+    //         if (Platform.OS === 'android') {
+    //             const granted = await PermissionsAndroid.check(
+    //                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    //             );
+    //             if (!granted) {
+    //                 const status = await PermissionsAndroid.request(
+    //                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    //                 );
+    //                 if (status === 'denied') {
+    //                     return;
+    //                 }
+    //             }
+    //         }
+    //         Geolocation.getCurrentPosition(
+    //             (position) => {
+    //                 setGpsEnabled(true);
+    //             },
+    //             (error) => {
+    //                 setGpsEnabled(false);
+    //             },
+    //             { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+    //         );
+    //     };
+
+    //     checkPermission();
+    // }, []);
+
+    const requestEnableGPS = () => {
+        if (Platform.OS === 'android') {
+            Linking.openSettings();
+        } else {
+            Linking.openURL('App-Prefs:Privacy');
+        }
+    };
+
+    return (
+        <View>
+            {gpsEnabled ? (
+                <Text style={{ color: 'green' }}>GPS is enabled</Text>
+            ) : (
+                <View>
+                    <Text style={{ color: 'red' }}>GPS is disabled</Text>
+                    <Text onPress={requestEnableGPS} style={{ color: 'blue' }}>
+                        Request to enable GPS
+                    </Text>
+                </View>
+            )}
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     mapMarkerContainer: {
