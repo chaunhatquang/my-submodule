@@ -7,12 +7,12 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { IAddressComponents, IResAddInfo } from "../../../define";
 import Toast from "react-native-root-toast";
 import { useNavigation } from "@react-navigation/native";
+import Geolocation from "@react-native-community/geolocation";
 import { IPosition } from "../Utils/MyPosition";
 import { IResultAddComponent, getIDAddress } from "../Utils/GetIdAddress";
-import Geolocation from "@react-native-community/geolocation";
 import { getAddress } from "../Services/api";
 
-let config = require("../../config/config.json");
+let config = require('../Config/config.json');
 const MAP4D_URL = config.MAP4D_URL;
 const KEY_MAP4D = config.KEY_MAP4D;
 
@@ -52,6 +52,7 @@ const MapPicker = () => {
                         Geolocation.getCurrentPosition(
                             position => {
                                 const { latitude, longitude } = position.coords;
+                                console.log("position.coords", position.coords);
                                 setCurrentPosition({ latitude, longitude });
                                 if (mapRef.current) {
                                     mapRef.current.animateToRegion({
@@ -64,7 +65,7 @@ const MapPicker = () => {
                                 }
                             },
                             error => console.log(error),
-                            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+                            { enableHighAccuracy: true, timeout: 20000 },
                         );
 
                         const watchId = Geolocation.watchPosition(
@@ -89,6 +90,7 @@ const MapPicker = () => {
                 Geolocation.getCurrentPosition(
                     position => {
                         const { latitude, longitude } = position.coords;
+                        console.log("position.coords", position.coords);
                         setCurrentPosition({ latitude, longitude });
                         if (mapRef.current) {
                             mapRef.current.animateToRegion({
@@ -149,28 +151,6 @@ const MapPicker = () => {
         return objAddComp;
     }
 
-    const getNameAddress = async (latitude: number, longitude: number) => {
-        let res: any = null;
-        const params = {
-            "key": KEY_MAP4D,
-            "location": `${latitude},${longitude}`
-        }
-        if (!currentPosition) {
-            res = await getAddress(MAP4D_URL, params);
-            const { code, result, message } = res;
-            if (code === 'ok') {
-                const addTypeResult = getAddressType(result);
-                let mapId = await getIDAddress(addTypeResult);
-                setAddressInfos(mapId);
-                setNameAddress(addTypeResult?.name);
-            } else {
-                Toast.show(message);
-                return;
-            }
-        }
-        return res;
-    }
-
     const convertCoordsToAddress = async (latitude: number, longitude: number) => {
         const params = {
             "key": KEY_MAP4D,
@@ -208,7 +188,7 @@ const MapPicker = () => {
     }
 
     const handleConfirmPositions = () => {
-        navigation.navigate('plant_new', { addressInfos: addressInfos });
+        navigation.navigate('new_accident', { addressInfos: addressInfos });
     }
 
     const onRegionChange = (region: any) => {
@@ -229,15 +209,15 @@ const MapPicker = () => {
                 initialRegion={{
                     latitude: currentPosition?.latitude || 0,
                     longitude: currentPosition?.longitude || 0,
-                    latitudeDelta: 0.0922,
+                    latitudeDelta: 0.0925,
                     longitudeDelta: 0.0421,
                 }}
             >
             </MapView>
-            {/* <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
                 <AntDesign name="arrowleft" size={24} color="black" />
-            </TouchableOpacity> */}
-            <View style={styles.mapMarkerContainer}>
+            </TouchableOpacity>
+            <View style={Platform.OS === 'android' ? styles.mapMarkerContainerAndroid : styles.mapMarkerContainerIos}>
                 <FontAwesome name="map-marker" size={40} color={'#ad1f1f'} />
             </View>
             <View style={styles.overlay}>
@@ -270,67 +250,16 @@ const InfoComponent: React.FC<IAddInfoProps> = (props) => {
     )
 }
 
-const CheckGPS = () => {
-    const [gpsEnabled, setGpsEnabled] = useState(false);
-
-    // useEffect(() => {
-    //     const checkPermission = async () => {
-    //         if (Platform.OS === 'android') {
-    //             const granted = await PermissionsAndroid.check(
-    //                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    //             );
-    //             if (!granted) {
-    //                 const status = await PermissionsAndroid.request(
-    //                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    //                 );
-    //                 if (status === 'denied') {
-    //                     return;
-    //                 }
-    //             }
-    //         }
-    //         Geolocation.getCurrentPosition(
-    //             (position) => {
-    //                 setGpsEnabled(true);
-    //             },
-    //             (error) => {
-    //                 setGpsEnabled(false);
-    //             },
-    //             { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-    //         );
-    //     };
-
-    //     checkPermission();
-    // }, []);
-
-    const requestEnableGPS = () => {
-        if (Platform.OS === 'android') {
-            Linking.openSettings();
-        } else {
-            Linking.openURL('App-Prefs:Privacy');
-        }
-    };
-
-    return (
-        <View>
-            {gpsEnabled ? (
-                <Text style={{ color: 'green' }}>GPS is enabled</Text>
-            ) : (
-                <View>
-                    <Text style={{ color: 'red' }}>GPS is disabled</Text>
-                    <Text onPress={requestEnableGPS} style={{ color: 'blue' }}>
-                        Request to enable GPS
-                    </Text>
-                </View>
-            )}
-        </View>
-    );
-};
-
 const styles = StyleSheet.create({
-    mapMarkerContainer: {
+    mapMarkerContainerAndroid: {
         left: '47%',
         position: 'absolute',
-        top: '42%'
+        top: '45%'
+    },
+    mapMarkerContainerIos: {
+        left: '47%',
+        position: 'absolute',
+        top: '47%'
     },
     container: {
         flex: 1,

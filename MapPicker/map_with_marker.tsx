@@ -12,8 +12,8 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { handleDirecttionWithPlatform } from "../Common/Direction";
 import DynamicPicker from "../Common/MultiPicker";
 import { paramsYear } from "../../screens/Params";
-import Geolocation from 'react-native-geolocation-service';
 import { Button } from "@rneui/base";
+import Geolocation from "@react-native-community/geolocation";
 
 let config = require("../Config/config.json");
 const URL = config.BASE_URL;

@@ -317,6 +317,33 @@ export function fetchThongTinTaiKhoan<T>(
     });
 }
 
+//Thong tin tai khoan
+export function fetchThongTinTaiKhoanVneID<T>(
+    url: string,
+    token: string
+) {
+    return new Promise<T | null>(resolve => {
+        const headers = {
+            'Authorization': `Bearer ${token}`
+        }
+        SoHoaClient
+            .get<T>(url, { headers: headers })
+            .then(response => {
+                var allData = response.data;
+                resolve(allData);
+            })
+            .catch(error => {
+                if (__DEV__) {
+                    console.log(error, 'err:', url);
+                }
+                resolve(null);
+            });
+    });
+}
+
+
+
+
 
 
 
