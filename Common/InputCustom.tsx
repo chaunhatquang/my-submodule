@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 interface InputProps {
     placeholder?: string;
@@ -9,12 +10,13 @@ interface InputProps {
     editable?: boolean;
     label?: string | null
     multiline?: boolean;
-    // rest: any
 }
 
-const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange, keyType, editable, label,multiline,...rest}) => {
+const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChange, keyType, editable, label, multiline, ...rest }) => {
     const [isFocus, setIsFocus] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
+
+    const inputRef = useRef<any>(null);
 
     useEffect(() => {
         if (isChecking) {
@@ -22,56 +24,59 @@ const InputCustom: React.FC<InputProps> = ({ placeholder, value, handleInputChan
         }
     }, [isChecking, value]);
 
-    const handleTextInputFocus = () => {
-        setIsChecking(true);
-    };
+    // Hàm xử lý khi người dùng nhấn vào biểu tượng X để xoá giá trị
+    const handleClearValue = () => {
+        handleInputChange('');
+
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }
 
     return (
         <View style={styles.container}>
-            {label && <Text style={styles.label}>{label}</Text>}
             <TextInput
                 style={styles.input}
                 value={value}
                 onChangeText={handleInputChange}
+                ref={inputRef}
                 placeholder={placeholder}
                 keyboardType={keyType}
-                onFocus={handleTextInputFocus}
-                placeholderTextColor='#999'
+                placeholderTextColor="#999"
                 editable={editable}
                 multiline={multiline}
                 {...rest}
             />
-            {isFocus && <Text style={styles.errorText}>Vui lòng nhập {placeholder}</Text>}
+            {value.length > 0 && (
+                <TouchableOpacity style={styles.clearIcon} onPress={handleClearValue}>
+                    <Ionicons style={{ padding: 5 }} name="close-circle" color={'gray'} size={22} />
+                </TouchableOpacity>
+            )}
         </View>
-    );
-};
+    )
+}
+
+export default InputCustom;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 8,
         marginBottom: 20,
     },
     input: {
+        flex: 1,
         height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        fontSize: 15,
-        color: 'black'
+        paddingHorizontal: 8
     },
-    inputError: {
-        borderColor: 'red',
+    clearIcon: {
+        padding: 3,
     },
-    errorText: {
+    clearText: {
         color: 'red',
-        fontSize: 13,
-    },
-    label: {
-        fontSize: 15,
-        marginBottom: 5,
+        fontSize: 18,
     },
 });
-
-
-export default InputCustom;
